@@ -1,0 +1,6 @@
+{
+  "@context": "https://chris-page-gov.github.io/okf-ai-infrastructure/context/okf-bundle-v1.jsonld",
+  "schema": "okf-moved.v1",
+  "kind": "okf-moved",
+  "moved_to": "https://chris-page-gov.github.io/okf-ai-infrastructure/okf-bundle.jsonld"
+}

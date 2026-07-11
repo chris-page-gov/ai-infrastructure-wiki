@@ -1,0 +1,24 @@
+<!doctype html>
+<html lang="en">
+<meta charset="utf-8">
+<title>OKF publication moved</title>
+<script>
+const prefix = '/ai-infrastructure-wiki';
+const path = location.pathname.startsWith(prefix) ? location.pathname.slice(prefix.length) : location.pathname;
+let base = 'https://chris-page-gov.github.io/okf-explorer';
+let suffix = path;
+if (path === '/next' || path.startsWith('/next/')) suffix = path.slice('/next'.length);
+else if (path === '/legacy' || path.startsWith('/legacy/')) {
+  base += '/legacy';
+  suffix = path.slice('/legacy'.length);
+} else if (path === '/legislation' || path.startsWith('/legislation/')) {
+  base = 'https://chris-page-gov.github.io/okf-uk-legislation';
+  suffix = path.slice('/legislation'.length);
+} else if (path === '/uk-government-apis' || path.startsWith('/uk-government-apis/')) {
+  base = 'https://chris-page-gov.github.io/okf-uk-government-apis';
+  suffix = path.slice('/uk-government-apis'.length);
+}
+location.replace(base + (suffix || '/') + location.search + location.hash);
+</script>
+<p>The requested OKF resource moved to its canonical publication.</p>
+</html>

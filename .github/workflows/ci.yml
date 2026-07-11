@@ -1,0 +1,29 @@
+name: Validate compatibility publication
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+permissions:
+  contents: read
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Validate compatibility contract
+        run: |
+          set -eu
+          python3 -m json.tool okf-bundle.json >/dev/null
+          python3 -m json.tool okf-bundle.jsonld >/dev/null
+          python3 -m json.tool okf-explorer.json >/dev/null
+          python3 -m json.tool legislation/okf-explorer.json >/dev/null
+          python3 -m json.tool legislation/okf-bundle.jsonld >/dev/null
+          python3 -m json.tool uk-government-apis/okf-explorer.json >/dev/null
+          python3 -m json.tool uk-government-apis/okf-bundle.jsonld >/dev/null
+          grep -q 'okf-moved.v1' README.md
+          grep -q 'location.replace' index.html
+          grep -q 'okf-uk-legislation' 404.html
+          grep -q 'okf-uk-government-apis' 404.html
