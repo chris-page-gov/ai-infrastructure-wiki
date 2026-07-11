@@ -1,0 +1,15 @@
+{
+  "schema": "okf-compatibility-map.v1",
+  "source_repository": "https://github.com/chris-page-gov/okf-explorer",
+  "documentation_snapshot_commit": "650a928",
+  "routes": {
+    "/": "local migration and discovery index",
+    "/next/": "https://chris-page-gov.github.io/okf-explorer/",
+    "/legacy/": "https://chris-page-gov.github.io/okf-explorer/legacy/",
+    "/docs/": "local documentation snapshot; missing documents fall back to the canonical GitHub folder",
+    "/gov-ckan/": "https://chris-page-gov.github.io/ai-engineering-lab-hackathon-london-2026/gov-ckan/",
+    "/legislation/": "https://chris-page-gov.github.io/okf-uk-legislation/",
+    "/uk-government-apis/": "https://chris-page-gov.github.io/okf-uk-government-apis/",
+    "/document/, /stack/, /standards/, /federated/, /frameworks/, /research/, /uk-government/, /organisations/, /glossary/": "https://chris-page-gov.github.io/okf-ai-infrastructure/"
+  }
+}

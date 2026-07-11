@@ -5,20 +5,25 @@
 <script>
 const prefix = '/ai-infrastructure-wiki';
 const path = location.pathname.startsWith(prefix) ? location.pathname.slice(prefix.length) : location.pathname;
-let base = 'https://chris-page-gov.github.io/okf-explorer';
-let suffix = path;
-if (path === '/next' || path.startsWith('/next/')) suffix = path.slice('/next'.length);
-else if (path === '/legacy' || path.startsWith('/legacy/')) {
-  base += '/legacy';
-  suffix = path.slice('/legacy'.length);
+let target;
+if (path === '/next' || path.startsWith('/next/')) {
+  target = 'https://chris-page-gov.github.io/okf-explorer' + (path.slice('/next'.length) || '/');
+} else if (path === '/legacy' || path.startsWith('/legacy/')) {
+  target = 'https://chris-page-gov.github.io/okf-explorer/legacy' + (path.slice('/legacy'.length) || '/');
+} else if (path === '/docs' || path.startsWith('/docs/')) {
+  target = 'https://github.com/chris-page-gov/okf-explorer/blob/main' + (path === '/docs' ? '/docs/index.md' : path);
+} else if (path === '/gov-ckan' || path.startsWith('/gov-ckan/')) {
+  target = 'https://chris-page-gov.github.io/ai-engineering-lab-hackathon-london-2026' + path;
 } else if (path === '/legislation' || path.startsWith('/legislation/')) {
-  base = 'https://chris-page-gov.github.io/okf-uk-legislation';
-  suffix = path.slice('/legislation'.length);
+  target = 'https://chris-page-gov.github.io/okf-uk-legislation' + (path.slice('/legislation'.length) || '/');
 } else if (path === '/uk-government-apis' || path.startsWith('/uk-government-apis/')) {
-  base = 'https://chris-page-gov.github.io/okf-uk-government-apis';
-  suffix = path.slice('/uk-government-apis'.length);
+  target = 'https://chris-page-gov.github.io/okf-uk-government-apis' + (path.slice('/uk-government-apis'.length) || '/');
+} else if (/^\/(document|stack|standards|federated|frameworks|research|uk-government|organisations|glossary)(\/|$)/.test(path)) {
+  target = 'https://chris-page-gov.github.io/okf-ai-infrastructure' + path;
+} else {
+  target = 'https://chris-page-gov.github.io/okf-explorer' + (path || '/');
 }
-location.replace(base + (suffix || '/') + location.search + location.hash);
+location.replace(target + location.search + location.hash);
 </script>
-<p>The requested OKF resource moved to its canonical publication.</p>
+<p>The requested OKF resource moved. Opening its canonical publication.</p>
 </html>
