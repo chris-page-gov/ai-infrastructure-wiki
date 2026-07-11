@@ -1,12 +1,45 @@
 <!doctype html>
 <html lang="en">
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width,initial-scale=1">
-<title>OKF Explorer moved</title>
-<link rel="canonical" href="https://chris-page-gov.github.io/okf-explorer/">
-<script>
-const target = 'https://chris-page-gov.github.io/okf-explorer/' + location.search + location.hash;
-location.replace(target);
-</script>
-<p>This site moved to <a href="https://chris-page-gov.github.io/okf-explorer/">OKF Explorer</a>.</p>
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>AI Infrastructure Wiki and OKF Explorer</title>
+  <style>
+    :root { color-scheme: light; font-family: system-ui, sans-serif; background: #f5f7f9; color: #17202a; }
+    body { margin: 0; }
+    main { max-width: 920px; margin: 0 auto; padding: 3rem 1.25rem 5rem; }
+    h1 { font-size: clamp(2rem, 5vw, 3.5rem); line-height: 1.05; margin-bottom: .7rem; }
+    .lede { font-size: 1.2rem; max-width: 46rem; color: #425466; }
+    .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 1rem; margin: 2rem 0; }
+    .card { display: block; padding: 1.2rem; border: 1px solid #c8d1da; border-radius: .6rem; background: white; color: inherit; text-decoration: none; }
+    .card:hover, .card:focus { border-color: #1d70b8; box-shadow: 0 0 0 3px #ffdd00; outline: none; }
+    .card strong { display: block; color: #003078; font-size: 1.15rem; margin-bottom: .35rem; }
+    code { overflow-wrap: anywhere; }
+  </style>
+  <script>
+    const params = new URLSearchParams(location.search);
+    if (params.has('bundle')) {
+      location.replace('https://chris-page-gov.github.io/okf-explorer/' + location.search + location.hash);
+    }
+  </script>
+</head>
+<body>
+<main>
+  <h1>AI Infrastructure Wiki and OKF Explorer</h1>
+  <p class="lede">The original repository has been split into the Explorer product and independently published OKF bundles. This compatibility site preserves the documentation and old public routes.</p>
+  <div class="grid">
+    <a class="card" href="https://chris-page-gov.github.io/okf-explorer/?bundle=https%3A%2F%2Fchris-page-gov.github.io%2Fai-engineering-lab-hackathon-london-2026%2Fgov-ckan%2Fokf-explorer.json&amp;view=reader#overview"><strong>GOV.UK CKAN data</strong>Open the large government-data corpus in OKF Explorer.</a>
+    <a class="card" href="docs/index.html"><strong>Documentation</strong>Browse the preserved guides, manuals, evaluation material and architecture notes.</a>
+    <a class="card" href="docs/okf-bundle-authoring.md"><strong>Create an OKF bundle</strong>Read the original bundle-authoring instructions.</a>
+    <a class="card" href="https://chris-page-gov.github.io/okf-explorer/"><strong>OKF Explorer</strong>Open the current generic Explorer and its bundle registry.</a>
+  </div>
+  <h2>Canonical bundles</h2>
+  <ul>
+    <li><a href="https://chris-page-gov.github.io/okf-ai-infrastructure/">AI Infrastructure</a></li>
+    <li><a href="https://chris-page-gov.github.io/okf-uk-government-apis/">UK Government APIs</a></li>
+    <li><a href="https://chris-page-gov.github.io/okf-uk-legislation/">UK Legislation</a></li>
+  </ul>
+  <p>The repository README retains the original detailed link index: <a href="https://github.com/chris-page-gov/ai-infrastructure-wiki#readme">open README</a>.</p>
+</main>
+</body>
 </html>
