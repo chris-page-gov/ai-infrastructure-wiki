@@ -92,6 +92,22 @@ const cases = [
     "https://chris-page-gov.github.io/okf-ai-infrastructure/stack/example?run=1#case",
   ],
   [
+    "/standards/arazzo.md",
+    "https://chris-page-gov.github.io/okf-ai-infrastructure/standards/arazzo.md?run=1#case",
+  ],
+  [
+    "/uk-government/gds-api-standards.md",
+    "https://chris-page-gov.github.io/okf-ai-infrastructure/uk-government/gds-api-standards.md?run=1#case",
+  ],
+  [
+    "/stack/observability-and-provenance.md",
+    "https://chris-page-gov.github.io/okf-ai-infrastructure/stack/observability-and-provenance.md?run=1#case",
+  ],
+  [
+    "/glossary/provenance.md",
+    "https://chris-page-gov.github.io/okf-ai-infrastructure/glossary/provenance.md?run=1#case",
+  ],
+  [
     "/unknown/path",
     "https://chris-page-gov.github.io/okf-explorer/unknown/path?run=1#case",
   ],

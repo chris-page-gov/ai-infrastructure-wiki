@@ -17,6 +17,14 @@ The compatibility validator rejects changes, removals or unrecorded additions
 inside that snapshot. Redirects and moved descriptors therefore live outside
 the preserved paths.
 
+The documentation snapshot links to five standards pages, the source-constraint
+ledger and one evaluation screenshot that were not included in the initial
+compatibility extraction. Those targets are now restored byte-for-byte from
+`chris-page-gov/okf-explorer` commit
+`650a9285504c2a0dcd189457e142d3f9cef2c842`. Their hashes are recorded
+separately in `preserved-routes.sha256`, so the original 40-file
+`snapshot-files.sha256` contract remains unchanged.
+
 ## Current legislation publications
 
 The compatibility layer maps former and bundle-relative routes to these

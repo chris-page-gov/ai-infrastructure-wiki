@@ -21,14 +21,32 @@ GOV_UK_CKAN = (
 )
 
 
+def read_hash_manifest(relative: str) -> dict[str, str]:
+    expected: dict[str, str] = {}
+    manifest_path = ROOT / relative
+    for line in manifest_path.read_text(encoding="utf-8").splitlines():
+        digest, path = line.split("  ", 1)
+        expected[path] = digest
+    return expected
+
+
+def validate_hashes(
+    failures: list[str], expected: dict[str, str], label: str
+) -> None:
+    for relative, expected_digest in expected.items():
+        path = ROOT / relative
+        if not path.is_file():
+            failures.append(f"{label}: missing file {relative}")
+            continue
+        actual_digest = hashlib.sha256(path.read_bytes()).hexdigest()
+        if actual_digest != expected_digest:
+            failures.append(f"{label}: digest mismatch for {relative}")
+
+
 def validate_snapshot(failures: list[str]) -> int:
     """Prove the archived README/docs bytes remain the approved snapshot."""
 
-    manifest_path = ROOT / "snapshot-files.sha256"
-    expected: dict[str, str] = {}
-    for line in manifest_path.read_text(encoding="utf-8").splitlines():
-        digest, relative = line.split("  ", 1)
-        expected[relative] = digest
+    expected = read_hash_manifest("snapshot-files.sha256")
 
     actual_paths = {"README.md"}
     actual_paths.update(
@@ -44,13 +62,15 @@ def validate_snapshot(failures: list[str]) -> int:
         if added:
             failures.append(f"documentation snapshot: unrecorded files {added}")
 
-    for relative, expected_digest in expected.items():
-        path = ROOT / relative
-        if not path.is_file():
-            continue
-        actual_digest = hashlib.sha256(path.read_bytes()).hexdigest()
-        if actual_digest != expected_digest:
-            failures.append(f"documentation snapshot: digest mismatch for {relative}")
+    validate_hashes(failures, expected, "documentation snapshot")
+    return len(expected)
+
+
+def validate_preserved_routes(failures: list[str]) -> int:
+    """Prove restored compatibility targets retain their authoritative bytes."""
+
+    expected = read_hash_manifest("preserved-routes.sha256")
+    validate_hashes(failures, expected, "preserved compatibility route")
     return len(expected)
 
 
@@ -107,6 +127,7 @@ def local_target(source: Path, value: str) -> Path | None:
 def main() -> None:
     failures: list[str] = []
     snapshot_count = validate_snapshot(failures)
+    preserved_route_count = validate_preserved_routes(failures)
     mapping = json.loads((ROOT / "compatibility-map.json").read_text(encoding="utf-8"))
     machine_routes = mapping.get("machine_routes", {})
     static_redirects = mapping.get("static_redirects", {})
@@ -127,6 +148,7 @@ def main() -> None:
         "docs/use-okf-explorer.md",
         "docs/ai-okf-usage.md",
         "compatibility-map.json",
+        "preserved-routes.sha256",
         "snapshot-files.sha256",
         "legislation/index.md",
         "legislation/log.md",
@@ -136,6 +158,8 @@ def main() -> None:
         "whole-law/log.md",
         "evaluation/whole-law/README.md",
         "scripts/check_redirects.mjs",
+        "scripts/check_internal_links.py",
+        "scripts/test_internal_links.py",
     }
     required = sorted(essential | set(machine_routes) | set(static_redirects))
     for relative in required:
@@ -273,6 +297,7 @@ def main() -> None:
         "compatibility validation passed: "
         f"{len(required)} critical files, "
         f"{snapshot_count} immutable snapshot files, "
+        f"{preserved_route_count} immutable restored targets, "
         f"{len(machine_routes)} moved descriptors, "
         f"and {len(static_redirects)} static redirects"
     )
