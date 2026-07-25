@@ -32,4 +32,18 @@ canonical paths:
 | Whole-Law documentation | `https://chris-page-gov.github.io/okf-uk-legislation/whole-law/docs/` |
 | Whole-Law evaluation | `https://chris-page-gov.github.io/okf-uk-legislation/whole-law/evaluation/` |
 
+## Current Explorer and government-data publications
+
+| Resource | Canonical path |
+|---|---|
+| OKF Explorer | `https://chris-page-gov.github.io/okf-explorer/` |
+| Explorer registry | `https://chris-page-gov.github.io/okf-explorer/okf-registry.json` |
+| UK Government APIs/data discovery | `https://chris-page-gov.github.io/okf-uk-government-apis/` |
+| UK Government APIs descriptor | `https://chris-page-gov.github.io/okf-uk-government-apis/okf-explorer.json` |
+| Historical full GOV.UK CKAN fixture | `https://chris-page-gov.github.io/ai-engineering-lab-hackathon-london-2026/gov-ckan/okf-explorer.json` |
+
+The historical full CKAN fixture and the current multi-source UK Government
+APIs/data discovery publication are not interchangeable. Compatibility routes
+retain both destinations and label the distinction.
+
 The complete machine-readable contract is in `compatibility-map.json`.

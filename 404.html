@@ -13,6 +13,8 @@ function suffixAfter(route) {
 
 if (path === '/evaluation/legislation' || path.startsWith('/evaluation/legislation/')) {
   target = 'https://chris-page-gov.github.io/okf-uk-legislation/evaluation' + suffixAfter('/evaluation/legislation');
+} else if (path === '/evaluation/whole-law' || path.startsWith('/evaluation/whole-law/')) {
+  target = 'https://chris-page-gov.github.io/okf-uk-legislation/whole-law/evaluation' + suffixAfter('/evaluation/whole-law');
 } else if (path === '/legislation/evaluation' || path.startsWith('/legislation/evaluation/')) {
   target = 'https://chris-page-gov.github.io/okf-uk-legislation/evaluation' + suffixAfter('/legislation/evaluation');
 } else if (path === '/legislation/docs' || path.startsWith('/legislation/docs/')) {
@@ -29,6 +31,10 @@ if (path === '/evaluation/legislation' || path.startsWith('/evaluation/legislati
   target = 'https://github.com/chris-page-gov/okf-explorer/blob/main' + (path === '/docs' ? '/docs/index.md' : path);
 } else if (path === '/gov-ckan' || path.startsWith('/gov-ckan/')) {
   target = 'https://chris-page-gov.github.io/ai-engineering-lab-hackathon-london-2026' + path;
+} else if (path === '/data-gov-uk' || path.startsWith('/data-gov-uk/')) {
+  target = 'https://chris-page-gov.github.io/okf-uk-government-apis' + suffixAfter('/data-gov-uk');
+} else if (path === '/data.gov.uk' || path.startsWith('/data.gov.uk/')) {
+  target = 'https://chris-page-gov.github.io/okf-uk-government-apis' + suffixAfter('/data.gov.uk');
 } else if (path === '/legislation' || path.startsWith('/legislation/')) {
   target = 'https://chris-page-gov.github.io/okf-uk-legislation' + (path.slice('/legislation'.length) || '/');
 } else if (path === '/uk-government-apis' || path.startsWith('/uk-government-apis/')) {

@@ -13,6 +13,12 @@ ROOT = Path(__file__).resolve().parents[1]
 MARKDOWN_LINK = re.compile(r"(?<!!)\[[^\]]+\]\(([^)]+)\)")
 REFERENCE_LINK = re.compile(r"^\[[^\]]+\]:\s+(\S+)", re.MULTILINE)
 LEGISLATION = "https://chris-page-gov.github.io/okf-uk-legislation"
+EXPLORER = "https://chris-page-gov.github.io/okf-explorer"
+GOVERNMENT_APIS = "https://chris-page-gov.github.io/okf-uk-government-apis"
+GOV_UK_CKAN = (
+    "https://chris-page-gov.github.io/"
+    "ai-engineering-lab-hackathon-london-2026/gov-ckan"
+)
 
 
 def validate_snapshot(failures: list[str]) -> int:
@@ -52,6 +58,28 @@ def validate_moved_descriptor(
     failures: list[str], relative: str, expected_target: str
 ) -> None:
     path = ROOT / relative
+    if path.suffix == ".yamlld":
+        try:
+            fields = dict(
+                line.split(":", 1)
+                for line in path.read_text(encoding="utf-8").splitlines()
+                if ":" in line and not line.startswith('"@context"')
+            )
+        except OSError as error:
+            failures.append(f"{relative}: cannot read YAML-LD moved descriptor: {error}")
+            return
+        fields = {key.strip(): value.strip() for key, value in fields.items()}
+        if fields.get("schema") != "okf-moved.v1":
+            failures.append(f"{relative}: invalid moved schema")
+        if fields.get("kind") != "okf-moved":
+            failures.append(f"{relative}: invalid moved kind")
+        if fields.get("moved_to") != expected_target:
+            failures.append(
+                f"{relative}: expected moved_to {expected_target}, "
+                f"got {fields.get('moved_to')}"
+            )
+        return
+
     try:
         descriptor = json.loads(path.read_text(encoding="utf-8"))
     except (OSError, json.JSONDecodeError) as error:
@@ -79,6 +107,9 @@ def local_target(source: Path, value: str) -> Path | None:
 def main() -> None:
     failures: list[str] = []
     snapshot_count = validate_snapshot(failures)
+    mapping = json.loads((ROOT / "compatibility-map.json").read_text(encoding="utf-8"))
+    machine_routes = mapping.get("machine_routes", {})
+    static_redirects = mapping.get("static_redirects", {})
 
     for relative in ("README.md", "docs/index.md"):
         source = ROOT / relative
@@ -89,39 +120,28 @@ def main() -> None:
             if target is not None and not target.exists():
                 failures.append(f"{relative}: missing local link target {value}")
 
-    required = (
+    essential = {
         "docs/index.html",
         "docs/index.md",
         "docs/okf-bundle-authoring.md",
         "docs/use-okf-explorer.md",
         "docs/ai-okf-usage.md",
-        "gov-ckan/index.html",
-        "gov-ckan/okf-explorer.json",
         "compatibility-map.json",
         "snapshot-files.sha256",
-        "legislation/docs/index.html",
-        "legislation/evaluation/index.html",
-        "legislation/evaluation/answer-schema.json",
-        "legislation/evaluation/questions.json",
-        "evaluation/legislation/index.html",
-        "evaluation/legislation/answer-schema.json",
-        "evaluation/legislation/questions.json",
-        "whole-law/index.html",
+        "legislation/index.md",
+        "legislation/log.md",
+        "uk-government-apis/index.md",
+        "uk-government-apis/log.md",
         "whole-law/index.md",
-        "whole-law/okf-explorer.json",
-        "whole-law/okf-bundle.yamlld",
-        "whole-law/okf-bundle.jsonld",
-        "whole-law/docs/index.html",
-        "whole-law/evaluation/index.html",
-        "whole-law/evaluation/answer-schema.json",
-        "whole-law/evaluation/questions.json",
+        "whole-law/log.md",
+        "evaluation/whole-law/README.md",
         "scripts/check_redirects.mjs",
-    )
+    }
+    required = sorted(essential | set(machine_routes) | set(static_redirects))
     for relative in required:
         if not (ROOT / relative).is_file():
             failures.append(f"missing required compatibility file {relative}")
 
-    mapping = json.loads((ROOT / "compatibility-map.json").read_text(encoding="utf-8"))
     if mapping.get("documentation_snapshot_commit") != "650a928":
         failures.append("compatibility-map.json: unexpected documentation snapshot")
     if mapping.get("documentation_snapshot_manifest") != "snapshot-files.sha256":
@@ -129,11 +149,32 @@ def main() -> None:
 
     canonical = mapping.get("canonical", {})
     expected_canonical = {
-        "explorer": "https://chris-page-gov.github.io/okf-explorer/",
-        "gov_uk_ckan_descriptor": (
-            "https://chris-page-gov.github.io/"
-            "ai-engineering-lab-hackathon-london-2026/gov-ckan/okf-explorer.json"
+        "explorer": f"{EXPLORER}/",
+        "explorer_repository": "https://github.com/chris-page-gov/okf-explorer",
+        "explorer_registry": f"{EXPLORER}/okf-registry.json",
+        "explorer_evaluation": (
+            f"{EXPLORER}/evaluation/okf-explorer/questions.json"
         ),
+        "gov_uk_ckan_descriptor": f"{GOV_UK_CKAN}/okf-explorer.json",
+        "gov_uk_ckan": {
+            "publication": f"{GOV_UK_CKAN}/",
+            "repository": (
+                "https://github.com/chris-page-gov/"
+                "ai-engineering-lab-hackathon-london-2026"
+            ),
+            "descriptor": f"{GOV_UK_CKAN}/okf-explorer.json",
+            "evaluation": f"{EXPLORER}/evaluation/gov-ckan/questions.json",
+        },
+        "uk_government_apis": {
+            "publication": f"{GOVERNMENT_APIS}/",
+            "repository": "https://github.com/chris-page-gov/okf-uk-government-apis",
+            "descriptor": f"{GOVERNMENT_APIS}/okf-explorer.json",
+            "yaml_ld": f"{GOVERNMENT_APIS}/okf-bundle.yamlld",
+            "json_ld": f"{GOVERNMENT_APIS}/okf-bundle.jsonld",
+            "documentation": (
+                f"{GOVERNMENT_APIS}/docs/UK-Government-API-OKF.md"
+            ),
+        },
         "legislation": {
             "publication": f"{LEGISLATION}/",
             "repository": "https://github.com/chris-page-gov/okf-uk-legislation",
@@ -164,69 +205,46 @@ def main() -> None:
     if canonical != expected_canonical:
         failures.append("compatibility-map.json: canonical URL contract changed")
 
-    moved_descriptors = {
-        "gov-ckan/okf-explorer.json": (
-            "https://chris-page-gov.github.io/"
-            "ai-engineering-lab-hackathon-london-2026/gov-ckan/okf-explorer.json"
-        ),
-        "legislation/okf-explorer.json": f"{LEGISLATION}/okf-explorer.json",
-        "legislation/evaluation/answer-schema.json": (
-            f"{LEGISLATION}/evaluation/answer-schema.json"
-        ),
-        "legislation/evaluation/questions.json": (
-            f"{LEGISLATION}/evaluation/questions.json"
-        ),
-        "evaluation/legislation/answer-schema.json": (
-            f"{LEGISLATION}/evaluation/answer-schema.json"
-        ),
-        "evaluation/legislation/questions.json": (
-            f"{LEGISLATION}/evaluation/questions.json"
-        ),
-        "whole-law/okf-explorer.json": (
-            f"{LEGISLATION}/whole-law/okf-explorer.json"
-        ),
-        "whole-law/okf-bundle.jsonld": (
-            f"{LEGISLATION}/whole-law/okf-bundle.jsonld"
-        ),
-        "whole-law/evaluation/answer-schema.json": (
-            f"{LEGISLATION}/whole-law/evaluation/answer-schema.json"
-        ),
-        "whole-law/evaluation/questions.json": (
-            f"{LEGISLATION}/whole-law/evaluation/questions.json"
-        ),
-    }
-    for relative, expected_target in moved_descriptors.items():
+    for relative, expected_target in machine_routes.items():
         validate_moved_descriptor(failures, relative, expected_target)
 
-    static_redirects = {
-        "legislation/index.html": f"{LEGISLATION}/",
-        "legislation/docs/index.html": f"{LEGISLATION}/docs/",
-        "legislation/evaluation/index.html": f"{LEGISLATION}/evaluation/",
-        "evaluation/legislation/index.html": f"{LEGISLATION}/evaluation/",
-        "whole-law/index.html": f"{LEGISLATION}/whole-law/",
-        "whole-law/docs/index.html": f"{LEGISLATION}/whole-law/docs/",
-        "whole-law/evaluation/index.html": f"{LEGISLATION}/whole-law/evaluation/",
-    }
+    discovered_moved = set()
+    for path in ROOT.rglob("*"):
+        if not path.is_file() or ".git" in path.parts:
+            continue
+        if path.suffix not in {".json", ".jsonld", ".yamlld"}:
+            continue
+        text = path.read_text(encoding="utf-8")
+        if '"kind": "okf-moved"' in text or "kind: okf-moved" in text:
+            discovered_moved.add(path.relative_to(ROOT).as_posix())
+    if discovered_moved != set(machine_routes):
+        missing = sorted(set(machine_routes) - discovered_moved)
+        unregistered = sorted(discovered_moved - set(machine_routes))
+        if missing:
+            failures.append(f"machine route manifest: missing moved files {missing}")
+        if unregistered:
+            failures.append(
+                f"machine route manifest: unregistered moved files {unregistered}"
+            )
+
     for relative, expected_target in static_redirects.items():
         text = (ROOT / relative).read_text(encoding="utf-8")
-        if expected_target not in text:
+        expected_origin = (
+            f"{urlsplit(expected_target).scheme}://{urlsplit(expected_target).netloc}"
+        )
+        if expected_target not in text and expected_origin not in text:
             failures.append(f"{relative}: missing canonical target {expected_target}")
-        if "location.search + location.hash" not in text:
+        if "location.replace" not in text:
+            failures.append(f"{relative}: missing location.replace redirect")
+        if "location.search" not in text or "location.hash" not in text:
             failures.append(f"{relative}: redirect does not preserve query and fragment")
-
-    yaml_ld = (ROOT / "whole-law/okf-bundle.yamlld").read_text(encoding="utf-8")
-    if (
-        "schema: okf-moved.v1" not in yaml_ld
-        or "kind: okf-moved" not in yaml_ld
-        or f"moved_to: {LEGISLATION}/whole-law/okf-bundle.yamlld" not in yaml_ld
-    ):
-        failures.append("whole-law/okf-bundle.yamlld: invalid moved descriptor")
 
     root_html = (ROOT / "index.html").read_text(encoding="utf-8")
     fallback = (ROOT / "404.html").read_text(encoding="utf-8")
     ckan_html = (ROOT / "gov-ckan/index.html").read_text(encoding="utf-8")
     for label, needle, text in (
         ("root", "GOV.UK CKAN data", root_html),
+        ("root", "UK Government APIs and data discovery", root_html),
         ("root", "docs/index.html", root_html),
         ("root", f"{LEGISLATION}/whole-law/", root_html),
         (
@@ -237,10 +255,13 @@ def main() -> None:
         ("404", "path.startsWith('/docs/')", fallback),
         ("404", "ai-engineering-lab-hackathon-london-2026", fallback),
         ("404", "path.startsWith('/evaluation/legislation/')", fallback),
+        ("404", "path.startsWith('/evaluation/whole-law/')", fallback),
         ("404", "path.startsWith('/legislation/evaluation/')", fallback),
         ("404", "path.startsWith('/legislation/docs/')", fallback),
         ("404", "path.startsWith('/docs/uk-legislation/')", fallback),
         ("404", "path.startsWith('/whole-law/')", fallback),
+        ("404", "path.startsWith('/data-gov-uk/')", fallback),
+        ("404", "path.startsWith('/data.gov.uk/')", fallback),
         ("404", "location.search + location.hash", fallback),
     ):
         if needle not in text:
@@ -252,7 +273,8 @@ def main() -> None:
         "compatibility validation passed: "
         f"{len(required)} critical files, "
         f"{snapshot_count} immutable snapshot files, "
-        f"and {len(moved_descriptors)} moved descriptors"
+        f"{len(machine_routes)} moved descriptors, "
+        f"and {len(static_redirects)} static redirects"
     )
 
 
