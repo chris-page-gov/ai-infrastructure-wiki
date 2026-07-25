@@ -1,0 +1,116 @@
+{
+  "bomFormat": "CycloneDX",
+  "components": [
+    {
+      "bom-ref": "pkg:github/actions/checkout@11d5960a326750d5838078e36cf38b85af677262",
+      "name": "actions/checkout",
+      "properties": [
+        {
+          "name": "okf:ref-kind",
+          "value": "commit-sha"
+        },
+        {
+          "name": "okf:workflows",
+          "value": ".github/workflows/ci.yml, .github/workflows/pages.yml"
+        }
+      ],
+      "purl": "pkg:github/actions/checkout@11d5960a326750d5838078e36cf38b85af677262",
+      "type": "application",
+      "version": "11d5960a326750d5838078e36cf38b85af677262"
+    },
+    {
+      "bom-ref": "pkg:github/actions/configure-pages@983d7736d9b0ae728b81ab479565c72886d7745b",
+      "name": "actions/configure-pages",
+      "properties": [
+        {
+          "name": "okf:ref-kind",
+          "value": "commit-sha"
+        },
+        {
+          "name": "okf:workflows",
+          "value": ".github/workflows/pages.yml"
+        }
+      ],
+      "purl": "pkg:github/actions/configure-pages@983d7736d9b0ae728b81ab479565c72886d7745b",
+      "type": "application",
+      "version": "983d7736d9b0ae728b81ab479565c72886d7745b"
+    },
+    {
+      "bom-ref": "pkg:github/actions/deploy-pages@d6db90164ac5ed86f2b6aed7e0febac5b3c0c03e",
+      "name": "actions/deploy-pages",
+      "properties": [
+        {
+          "name": "okf:ref-kind",
+          "value": "commit-sha"
+        },
+        {
+          "name": "okf:workflows",
+          "value": ".github/workflows/pages.yml"
+        }
+      ],
+      "purl": "pkg:github/actions/deploy-pages@d6db90164ac5ed86f2b6aed7e0febac5b3c0c03e",
+      "type": "application",
+      "version": "d6db90164ac5ed86f2b6aed7e0febac5b3c0c03e"
+    },
+    {
+      "bom-ref": "pkg:github/actions/upload-pages-artifact@56afc609e74202658d3ffba0e8f6dda462b719fa",
+      "name": "actions/upload-pages-artifact",
+      "properties": [
+        {
+          "name": "okf:ref-kind",
+          "value": "commit-sha"
+        },
+        {
+          "name": "okf:workflows",
+          "value": ".github/workflows/pages.yml"
+        }
+      ],
+      "purl": "pkg:github/actions/upload-pages-artifact@56afc609e74202658d3ffba0e8f6dda462b719fa",
+      "type": "application",
+      "version": "56afc609e74202658d3ffba0e8f6dda462b719fa"
+    }
+  ],
+  "dependencies": [
+    {
+      "dependsOn": [
+        "pkg:github/actions/checkout@11d5960a326750d5838078e36cf38b85af677262",
+        "pkg:github/actions/configure-pages@983d7736d9b0ae728b81ab479565c72886d7745b",
+        "pkg:github/actions/deploy-pages@d6db90164ac5ed86f2b6aed7e0febac5b3c0c03e",
+        "pkg:github/actions/upload-pages-artifact@56afc609e74202658d3ffba0e8f6dda462b719fa"
+      ],
+      "ref": "pkg:github/chris-page-gov/ai-infrastructure-wiki@compat"
+    }
+  ],
+  "metadata": {
+    "component": {
+      "bom-ref": "pkg:github/chris-page-gov/ai-infrastructure-wiki@compat",
+      "licenses": [
+        {
+          "license": {
+            "id": "MIT"
+          }
+        }
+      ],
+      "name": "ai-infrastructure-wiki compatibility publication",
+      "type": "application",
+      "version": "compat-snapshot"
+    },
+    "properties": [
+      {
+        "name": "okf:preserved-routes-sha256",
+        "value": "9d605f0a6b01924231f0803b5cf774c86cba2289be805ab331167929619144cc"
+      }
+    ],
+    "tools": {
+      "components": [
+        {
+          "name": "build_sbom.py",
+          "type": "application",
+          "version": "1.0.0"
+        }
+      ]
+    }
+  },
+  "specVersion": "1.6",
+  "version": 1
+}

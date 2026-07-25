@@ -38,4 +38,5 @@ jobs:
           python3 scripts/check_compatibility.py
           python3 scripts/test_internal_links.py
           python3 scripts/check_internal_links.py
+          python3 scripts/build_sbom.py --check
           node scripts/check_redirects.mjs
