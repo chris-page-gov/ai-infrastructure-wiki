@@ -3,6 +3,7 @@
 
 from __future__ import annotations
 
+import hashlib
 import json
 import re
 from pathlib import Path
@@ -11,6 +12,60 @@ from urllib.parse import unquote, urlsplit
 ROOT = Path(__file__).resolve().parents[1]
 MARKDOWN_LINK = re.compile(r"(?<!!)\[[^\]]+\]\(([^)]+)\)")
 REFERENCE_LINK = re.compile(r"^\[[^\]]+\]:\s+(\S+)", re.MULTILINE)
+LEGISLATION = "https://chris-page-gov.github.io/okf-uk-legislation"
+
+
+def validate_snapshot(failures: list[str]) -> int:
+    """Prove the archived README/docs bytes remain the approved snapshot."""
+
+    manifest_path = ROOT / "snapshot-files.sha256"
+    expected: dict[str, str] = {}
+    for line in manifest_path.read_text(encoding="utf-8").splitlines():
+        digest, relative = line.split("  ", 1)
+        expected[relative] = digest
+
+    actual_paths = {"README.md"}
+    actual_paths.update(
+        path.relative_to(ROOT).as_posix()
+        for path in (ROOT / "docs").rglob("*")
+        if path.is_file()
+    )
+    if actual_paths != set(expected):
+        missing = sorted(set(expected) - actual_paths)
+        added = sorted(actual_paths - set(expected))
+        if missing:
+            failures.append(f"documentation snapshot: missing files {missing}")
+        if added:
+            failures.append(f"documentation snapshot: unrecorded files {added}")
+
+    for relative, expected_digest in expected.items():
+        path = ROOT / relative
+        if not path.is_file():
+            continue
+        actual_digest = hashlib.sha256(path.read_bytes()).hexdigest()
+        if actual_digest != expected_digest:
+            failures.append(f"documentation snapshot: digest mismatch for {relative}")
+    return len(expected)
+
+
+def validate_moved_descriptor(
+    failures: list[str], relative: str, expected_target: str
+) -> None:
+    path = ROOT / relative
+    try:
+        descriptor = json.loads(path.read_text(encoding="utf-8"))
+    except (OSError, json.JSONDecodeError) as error:
+        failures.append(f"{relative}: cannot read JSON moved descriptor: {error}")
+        return
+    if descriptor.get("schema") != "okf-moved.v1":
+        failures.append(f"{relative}: invalid moved schema")
+    if descriptor.get("kind") != "okf-moved":
+        failures.append(f"{relative}: invalid moved kind")
+    if descriptor.get("moved_to") != expected_target:
+        failures.append(
+            f"{relative}: expected moved_to {expected_target}, "
+            f"got {descriptor.get('moved_to')}"
+        )
 
 
 def local_target(source: Path, value: str) -> Path | None:
@@ -23,6 +78,8 @@ def local_target(source: Path, value: str) -> Path | None:
 
 def main() -> None:
     failures: list[str] = []
+    snapshot_count = validate_snapshot(failures)
+
     for relative in ("README.md", "docs/index.md"):
         source = ROOT / relative
         text = source.read_text(encoding="utf-8")
@@ -41,6 +98,24 @@ def main() -> None:
         "gov-ckan/index.html",
         "gov-ckan/okf-explorer.json",
         "compatibility-map.json",
+        "snapshot-files.sha256",
+        "legislation/docs/index.html",
+        "legislation/evaluation/index.html",
+        "legislation/evaluation/answer-schema.json",
+        "legislation/evaluation/questions.json",
+        "evaluation/legislation/index.html",
+        "evaluation/legislation/answer-schema.json",
+        "evaluation/legislation/questions.json",
+        "whole-law/index.html",
+        "whole-law/index.md",
+        "whole-law/okf-explorer.json",
+        "whole-law/okf-bundle.yamlld",
+        "whole-law/okf-bundle.jsonld",
+        "whole-law/docs/index.html",
+        "whole-law/evaluation/index.html",
+        "whole-law/evaluation/answer-schema.json",
+        "whole-law/evaluation/questions.json",
+        "scripts/check_redirects.mjs",
     )
     for relative in required:
         if not (ROOT / relative).is_file():
@@ -49,25 +124,136 @@ def main() -> None:
     mapping = json.loads((ROOT / "compatibility-map.json").read_text(encoding="utf-8"))
     if mapping.get("documentation_snapshot_commit") != "650a928":
         failures.append("compatibility-map.json: unexpected documentation snapshot")
+    if mapping.get("documentation_snapshot_manifest") != "snapshot-files.sha256":
+        failures.append("compatibility-map.json: missing documentation snapshot manifest")
 
-    ckan = json.loads((ROOT / "gov-ckan/okf-explorer.json").read_text(encoding="utf-8"))
-    if ckan.get("kind") != "okf-moved" or "gov-ckan/okf-explorer.json" not in ckan.get("moved_to", ""):
-        failures.append("gov-ckan/okf-explorer.json: invalid moved descriptor")
+    canonical = mapping.get("canonical", {})
+    expected_canonical = {
+        "explorer": "https://chris-page-gov.github.io/okf-explorer/",
+        "gov_uk_ckan_descriptor": (
+            "https://chris-page-gov.github.io/"
+            "ai-engineering-lab-hackathon-london-2026/gov-ckan/okf-explorer.json"
+        ),
+        "legislation": {
+            "publication": f"{LEGISLATION}/",
+            "repository": "https://github.com/chris-page-gov/okf-uk-legislation",
+            "descriptor": f"{LEGISLATION}/okf-explorer.json",
+            "yaml_ld": f"{LEGISLATION}/okf-bundle.yamlld",
+            "json_ld": f"{LEGISLATION}/okf-bundle.jsonld",
+            "documentation": f"{LEGISLATION}/docs/",
+            "evaluation": f"{LEGISLATION}/evaluation/",
+            "evaluation_schema": f"{LEGISLATION}/evaluation/answer-schema.json",
+            "evaluation_questions": f"{LEGISLATION}/evaluation/questions.json",
+        },
+        "whole_law": {
+            "publication": f"{LEGISLATION}/whole-law/",
+            "descriptor": f"{LEGISLATION}/whole-law/okf-explorer.json",
+            "yaml_ld": f"{LEGISLATION}/whole-law/okf-bundle.yamlld",
+            "json_ld": f"{LEGISLATION}/whole-law/okf-bundle.jsonld",
+            "markdown_index": f"{LEGISLATION}/whole-law/index.md",
+            "documentation": f"{LEGISLATION}/whole-law/docs/",
+            "evaluation": f"{LEGISLATION}/whole-law/evaluation/",
+            "evaluation_schema": (
+                f"{LEGISLATION}/whole-law/evaluation/answer-schema.json"
+            ),
+            "evaluation_questions": (
+                f"{LEGISLATION}/whole-law/evaluation/questions.json"
+            ),
+        },
+    }
+    if canonical != expected_canonical:
+        failures.append("compatibility-map.json: canonical URL contract changed")
+
+    moved_descriptors = {
+        "gov-ckan/okf-explorer.json": (
+            "https://chris-page-gov.github.io/"
+            "ai-engineering-lab-hackathon-london-2026/gov-ckan/okf-explorer.json"
+        ),
+        "legislation/okf-explorer.json": f"{LEGISLATION}/okf-explorer.json",
+        "legislation/evaluation/answer-schema.json": (
+            f"{LEGISLATION}/evaluation/answer-schema.json"
+        ),
+        "legislation/evaluation/questions.json": (
+            f"{LEGISLATION}/evaluation/questions.json"
+        ),
+        "evaluation/legislation/answer-schema.json": (
+            f"{LEGISLATION}/evaluation/answer-schema.json"
+        ),
+        "evaluation/legislation/questions.json": (
+            f"{LEGISLATION}/evaluation/questions.json"
+        ),
+        "whole-law/okf-explorer.json": (
+            f"{LEGISLATION}/whole-law/okf-explorer.json"
+        ),
+        "whole-law/okf-bundle.jsonld": (
+            f"{LEGISLATION}/whole-law/okf-bundle.jsonld"
+        ),
+        "whole-law/evaluation/answer-schema.json": (
+            f"{LEGISLATION}/whole-law/evaluation/answer-schema.json"
+        ),
+        "whole-law/evaluation/questions.json": (
+            f"{LEGISLATION}/whole-law/evaluation/questions.json"
+        ),
+    }
+    for relative, expected_target in moved_descriptors.items():
+        validate_moved_descriptor(failures, relative, expected_target)
+
+    static_redirects = {
+        "legislation/index.html": f"{LEGISLATION}/",
+        "legislation/docs/index.html": f"{LEGISLATION}/docs/",
+        "legislation/evaluation/index.html": f"{LEGISLATION}/evaluation/",
+        "evaluation/legislation/index.html": f"{LEGISLATION}/evaluation/",
+        "whole-law/index.html": f"{LEGISLATION}/whole-law/",
+        "whole-law/docs/index.html": f"{LEGISLATION}/whole-law/docs/",
+        "whole-law/evaluation/index.html": f"{LEGISLATION}/whole-law/evaluation/",
+    }
+    for relative, expected_target in static_redirects.items():
+        text = (ROOT / relative).read_text(encoding="utf-8")
+        if expected_target not in text:
+            failures.append(f"{relative}: missing canonical target {expected_target}")
+        if "location.search + location.hash" not in text:
+            failures.append(f"{relative}: redirect does not preserve query and fragment")
+
+    yaml_ld = (ROOT / "whole-law/okf-bundle.yamlld").read_text(encoding="utf-8")
+    if (
+        "schema: okf-moved.v1" not in yaml_ld
+        or "kind: okf-moved" not in yaml_ld
+        or f"moved_to: {LEGISLATION}/whole-law/okf-bundle.yamlld" not in yaml_ld
+    ):
+        failures.append("whole-law/okf-bundle.yamlld: invalid moved descriptor")
 
     root_html = (ROOT / "index.html").read_text(encoding="utf-8")
     fallback = (ROOT / "404.html").read_text(encoding="utf-8")
+    ckan_html = (ROOT / "gov-ckan/index.html").read_text(encoding="utf-8")
     for label, needle, text in (
         ("root", "GOV.UK CKAN data", root_html),
         ("root", "docs/index.html", root_html),
+        ("root", f"{LEGISLATION}/whole-law/", root_html),
+        (
+            "gov-ckan",
+            "ai-engineering-lab-hackathon-london-2026%2Fgov-ckan%2Fokf-explorer.json",
+            ckan_html,
+        ),
         ("404", "path.startsWith('/docs/')", fallback),
         ("404", "ai-engineering-lab-hackathon-london-2026", fallback),
+        ("404", "path.startsWith('/evaluation/legislation/')", fallback),
+        ("404", "path.startsWith('/legislation/evaluation/')", fallback),
+        ("404", "path.startsWith('/legislation/docs/')", fallback),
+        ("404", "path.startsWith('/docs/uk-legislation/')", fallback),
+        ("404", "path.startsWith('/whole-law/')", fallback),
+        ("404", "location.search + location.hash", fallback),
     ):
         if needle not in text:
             failures.append(f"{label}: missing {needle}")
 
     if failures:
         raise SystemExit("compatibility validation failed:\n- " + "\n- ".join(failures))
-    print(f"compatibility validation passed: {len(required)} critical files and README links")
+    print(
+        "compatibility validation passed: "
+        f"{len(required)} critical files, "
+        f"{snapshot_count} immutable snapshot files, "
+        f"and {len(moved_descriptors)} moved descriptors"
+    )
 
 
 if __name__ == "__main__":

@@ -2,6 +2,33 @@
   "schema": "okf-compatibility-map.v1",
   "source_repository": "https://github.com/chris-page-gov/okf-explorer",
   "documentation_snapshot_commit": "650a928",
+  "documentation_snapshot_manifest": "snapshot-files.sha256",
+  "canonical": {
+    "explorer": "https://chris-page-gov.github.io/okf-explorer/",
+    "gov_uk_ckan_descriptor": "https://chris-page-gov.github.io/ai-engineering-lab-hackathon-london-2026/gov-ckan/okf-explorer.json",
+    "legislation": {
+      "publication": "https://chris-page-gov.github.io/okf-uk-legislation/",
+      "repository": "https://github.com/chris-page-gov/okf-uk-legislation",
+      "descriptor": "https://chris-page-gov.github.io/okf-uk-legislation/okf-explorer.json",
+      "yaml_ld": "https://chris-page-gov.github.io/okf-uk-legislation/okf-bundle.yamlld",
+      "json_ld": "https://chris-page-gov.github.io/okf-uk-legislation/okf-bundle.jsonld",
+      "documentation": "https://chris-page-gov.github.io/okf-uk-legislation/docs/",
+      "evaluation": "https://chris-page-gov.github.io/okf-uk-legislation/evaluation/",
+      "evaluation_schema": "https://chris-page-gov.github.io/okf-uk-legislation/evaluation/answer-schema.json",
+      "evaluation_questions": "https://chris-page-gov.github.io/okf-uk-legislation/evaluation/questions.json"
+    },
+    "whole_law": {
+      "publication": "https://chris-page-gov.github.io/okf-uk-legislation/whole-law/",
+      "descriptor": "https://chris-page-gov.github.io/okf-uk-legislation/whole-law/okf-explorer.json",
+      "yaml_ld": "https://chris-page-gov.github.io/okf-uk-legislation/whole-law/okf-bundle.yamlld",
+      "json_ld": "https://chris-page-gov.github.io/okf-uk-legislation/whole-law/okf-bundle.jsonld",
+      "markdown_index": "https://chris-page-gov.github.io/okf-uk-legislation/whole-law/index.md",
+      "documentation": "https://chris-page-gov.github.io/okf-uk-legislation/whole-law/docs/",
+      "evaluation": "https://chris-page-gov.github.io/okf-uk-legislation/whole-law/evaluation/",
+      "evaluation_schema": "https://chris-page-gov.github.io/okf-uk-legislation/whole-law/evaluation/answer-schema.json",
+      "evaluation_questions": "https://chris-page-gov.github.io/okf-uk-legislation/whole-law/evaluation/questions.json"
+    }
+  },
   "routes": {
     "/": "local migration and discovery index",
     "/next/": "https://chris-page-gov.github.io/okf-explorer/",
@@ -9,6 +36,10 @@
     "/docs/": "local documentation snapshot; missing documents fall back to the canonical GitHub folder",
     "/gov-ckan/": "https://chris-page-gov.github.io/ai-engineering-lab-hackathon-london-2026/gov-ckan/",
     "/legislation/": "https://chris-page-gov.github.io/okf-uk-legislation/",
+    "/legislation/docs/": "https://chris-page-gov.github.io/okf-uk-legislation/docs/",
+    "/legislation/evaluation/": "https://chris-page-gov.github.io/okf-uk-legislation/evaluation/",
+    "/evaluation/legislation/": "https://chris-page-gov.github.io/okf-uk-legislation/evaluation/",
+    "/whole-law/": "https://chris-page-gov.github.io/okf-uk-legislation/whole-law/",
     "/uk-government-apis/": "https://chris-page-gov.github.io/okf-uk-government-apis/",
     "/document/, /stack/, /standards/, /federated/, /frameworks/, /research/, /uk-government/, /organisations/, /glossary/": "https://chris-page-gov.github.io/okf-ai-infrastructure/"
   }

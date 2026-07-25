@@ -1,0 +1,6 @@
+{
+  "@context": "https://chris-page-gov.github.io/okf-uk-legislation/profile/whole-law/v1/context.jsonld",
+  "schema": "okf-moved.v1",
+  "kind": "okf-moved",
+  "moved_to": "https://chris-page-gov.github.io/okf-uk-legislation/whole-law/okf-bundle.jsonld"
+}
