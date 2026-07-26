@@ -6,7 +6,24 @@
 const prefix = '/ai-infrastructure-wiki';
 const path = location.pathname.startsWith(prefix) ? location.pathname.slice(prefix.length) : location.pathname;
 let target;
-if (path === '/next' || path.startsWith('/next/')) {
+
+function suffixAfter(route) {
+  return path.slice(route.length) || '/';
+}
+
+if (path === '/evaluation/legislation' || path.startsWith('/evaluation/legislation/')) {
+  target = 'https://chris-page-gov.github.io/okf-uk-legislation/evaluation' + suffixAfter('/evaluation/legislation');
+} else if (path === '/evaluation/whole-law' || path.startsWith('/evaluation/whole-law/')) {
+  target = 'https://chris-page-gov.github.io/okf-uk-legislation/whole-law/evaluation' + suffixAfter('/evaluation/whole-law');
+} else if (path === '/legislation/evaluation' || path.startsWith('/legislation/evaluation/')) {
+  target = 'https://chris-page-gov.github.io/okf-uk-legislation/evaluation' + suffixAfter('/legislation/evaluation');
+} else if (path === '/legislation/docs' || path.startsWith('/legislation/docs/')) {
+  target = 'https://chris-page-gov.github.io/okf-uk-legislation/docs' + suffixAfter('/legislation/docs');
+} else if (path === '/docs/uk-legislation' || path.startsWith('/docs/uk-legislation/')) {
+  target = 'https://chris-page-gov.github.io/okf-uk-legislation/docs' + suffixAfter('/docs/uk-legislation');
+} else if (path === '/whole-law' || path.startsWith('/whole-law/')) {
+  target = 'https://chris-page-gov.github.io/okf-uk-legislation/whole-law' + suffixAfter('/whole-law');
+} else if (path === '/next' || path.startsWith('/next/')) {
   target = 'https://chris-page-gov.github.io/okf-explorer' + (path.slice('/next'.length) || '/');
 } else if (path === '/legacy' || path.startsWith('/legacy/')) {
   target = 'https://chris-page-gov.github.io/okf-explorer/legacy' + (path.slice('/legacy'.length) || '/');
@@ -14,6 +31,10 @@ if (path === '/next' || path.startsWith('/next/')) {
   target = 'https://github.com/chris-page-gov/okf-explorer/blob/main' + (path === '/docs' ? '/docs/index.md' : path);
 } else if (path === '/gov-ckan' || path.startsWith('/gov-ckan/')) {
   target = 'https://chris-page-gov.github.io/ai-engineering-lab-hackathon-london-2026' + path;
+} else if (path === '/data-gov-uk' || path.startsWith('/data-gov-uk/')) {
+  target = 'https://chris-page-gov.github.io/okf-uk-government-apis' + suffixAfter('/data-gov-uk');
+} else if (path === '/data.gov.uk' || path.startsWith('/data.gov.uk/')) {
+  target = 'https://chris-page-gov.github.io/okf-uk-government-apis' + suffixAfter('/data.gov.uk');
 } else if (path === '/legislation' || path.startsWith('/legislation/')) {
   target = 'https://chris-page-gov.github.io/okf-uk-legislation' + (path.slice('/legislation'.length) || '/');
 } else if (path === '/uk-government-apis' || path.startsWith('/uk-government-apis/')) {
@@ -25,5 +46,11 @@ if (path === '/next' || path.startsWith('/next/')) {
 }
 location.replace(target + location.search + location.hash);
 </script>
-<p>The requested OKF resource moved. Opening its canonical publication.</p>
+<noscript>
+  <p>The requested OKF resource moved. Use the
+    <a href="https://chris-page-gov.github.io/okf-explorer/">OKF Explorer</a>
+    or consult the
+    <a href="https://github.com/chris-page-gov/ai-infrastructure-wiki/blob/main/compatibility-map.json">compatibility map</a>.
+  </p>
+</noscript>
 </html>
