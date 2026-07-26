@@ -160,6 +160,8 @@ def main() -> None:
         "scripts/check_redirects.mjs",
         "scripts/check_internal_links.py",
         "scripts/test_internal_links.py",
+        "scripts/test_workflow_contract.py",
+        "scripts/validate_compatibility_publication.sh",
     }
     required = sorted(essential | set(machine_routes) | set(static_redirects))
     for relative in required:

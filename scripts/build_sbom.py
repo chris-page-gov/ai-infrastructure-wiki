@@ -18,10 +18,10 @@ ACTION = re.compile(
 
 
 def build() -> dict[str, object]:
-    usages: dict[tuple[str, str], list[str]] = {}
+    usages: dict[tuple[str, str], set[str]] = {}
     for workflow in sorted((ROOT / ".github" / "workflows").glob("*.yml")):
         for name, revision in ACTION.findall(workflow.read_text(encoding="utf-8")):
-            usages.setdefault((name, revision), []).append(
+            usages.setdefault((name, revision), set()).add(
                 workflow.relative_to(ROOT).as_posix()
             )
     if not usages:
@@ -35,7 +35,10 @@ def build() -> dict[str, object]:
                 "name": name,
                 "properties": [
                     {"name": "okf:ref-kind", "value": "commit-sha"},
-                    {"name": "okf:workflows", "value": ", ".join(workflows)},
+                    {
+                        "name": "okf:workflows",
+                        "value": ", ".join(sorted(workflows)),
+                    },
                 ],
                 "purl": reference,
                 "type": "application",
