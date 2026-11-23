@@ -255,7 +255,3 @@ Pages to use **GitHub Actions** as the source.
 [persona-manual]: docs/okf-explorer-persona-manual.md
 [ai-okf-usage]: docs/ai-okf-usage.md
 [bundle-authoring]: docs/okf-bundle-authoring.md
-
-## OKF standards and bundle discovery
-
-The [central standards register](https://github.com/chris-page-gov/okf-explorer/blob/main/docs/okf-standards.md) records current and historical OKF specifications, version-specific pins and the public bundle catalogue. Use the [machine-readable register](https://raw.githubusercontent.com/chris-page-gov/okf-explorer/main/registry/okf-standards.json) to resolve the version implemented by this repository.
